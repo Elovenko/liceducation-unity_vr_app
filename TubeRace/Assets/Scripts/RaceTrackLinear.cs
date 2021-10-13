@@ -16,13 +16,12 @@ namespace Assets.Scripts.Race
 
         public override Vector3 GetDirection(float distance)
         {
-            //distance = Mathf.Clamp(distance, 0, GetTrackLength());
             return (m_End.position - m_Start.position).normalized;
         }
 
         public override Vector3 GetPosition(float distance)
         {
-            distance = Mathf.Clamp(distance,0, GetTrackLength());
+            distance = Mathf.Repeat(distance, GetTrackLength());
 
             Vector3 direction = m_End.position - m_Start.position;
             direction = direction.normalized;
@@ -45,10 +44,10 @@ namespace Assets.Scripts.Race
 
         #region Test
 
-        [SerializeField] private float m_TestDistance;
+        [SerializeField] internal float m_TestDistance;
         [SerializeField] private Transform m_TestObject;
 
-        private void OnValidate()
+        internal void OnValidate()
         {
             m_TestObject.position = GetPosition(m_TestDistance);
             m_TestObject.forward = GetDirection(m_TestDistance);

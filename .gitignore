@@ -11,10 +11,12 @@
 /[Bb]uild/
 */[Bb]uild/
 /[Bb]uilds/
+*/Build_Android/
 /[Ll]ogs/
 */[Ll]ogs/
 /[Mm]emoryCaptures/
 */[Mm]emoryCaptures/
+*/Assets/Demonstrations/*.meta
 
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
