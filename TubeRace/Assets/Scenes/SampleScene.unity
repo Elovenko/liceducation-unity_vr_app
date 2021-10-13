@@ -420,8 +420,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d52eed7f59415334eb399fb404027e61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TestSpeed: 1
-  m_IsForwardDirection: 0
+  m_TestSpeed: 0.39
+  m_IsForwardDirection: 1
   m_TrackObject: {fileID: 1195891403}
 --- !u!136 &587157592
 CapsuleCollider:

@@ -4,7 +4,7 @@ namespace Assets.Scripts.Race
 {
     public class TestObjectScript : MonoBehaviour
     {
-        [Range(0.0f, 10.0f)]
+        [Range(1.0f, 10.0f)]
         [SerializeField] private float m_TestSpeed;
 
         [SerializeField] private bool m_IsForwardDirection;
@@ -21,7 +21,7 @@ namespace Assets.Scripts.Race
         void Update()
         {
             // Меняем направление движения после каждой 3-й итерации.
-            if (Mathf.Floor(m_TrackObject.m_TestDistance) % (3 * trackLength) == 0)
+            if (Mathf.Ceil(m_TrackObject.m_TestDistance) % (3 * trackLength) == 0)
             {
                 m_IsForwardDirection = !m_IsForwardDirection;
             }
