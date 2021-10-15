@@ -9,6 +9,12 @@ namespace Assets.Scripts.Helicopter
     [Serializable]
     public class HelicopterParameters
     {
+        //1 не нужно комментировать абсолютно каждую строку
+        //документация кода - это хорошо, но, если название поля говорит само за себя (а к этому хорошо бы стремиться) то и пояснения ему ни к чему
+        //помимо поясительной нагрузки summary банально жрет много места, что может усложнить восприятие кода программисту
+        //например, если в классе "параметры вертолета" есть поле "масса", то очевидно, что масса является массой вертолета
+
+
         /// <summary>
         /// Масса вертолёта.
         /// </summary>
@@ -26,6 +32,9 @@ namespace Assets.Scripts.Helicopter
         /// </summary>
         public bool useWheels;
 
+        //2 хороший момент, что оба винта являются реализацией одной сущности
+
+
         /// <summary>
         /// Параметры заднего винта (расположенного на хвосте вертикально).
         /// </summary>
@@ -35,6 +44,8 @@ namespace Assets.Scripts.Helicopter
         /// Параметры основного винта (расположенного горизонтально).
         /// </summary>
         public RotorParameters mainRotor;
+
+        // 3 лучше модель вешать в дочерние обхъекты на сцене и в префабе хранить сам вертолет в целом
 
         /// <summary>
         /// Префаб с моделью корпуса.
@@ -51,8 +62,14 @@ namespace Assets.Scripts.Helicopter
     /// Параметры винта.
     /// </summary>
     [Serializable]
-    public class RotorParameters
+    public class RotorParameters 
     {
+        // 4 в сущности винта есть проблемы, в частности они касаются того, что в ней идет указание ненужных параметров, тк они являются просто частью визуализации
+
+
+        // 4.1 например это касается кол-ва лопастей. 3 или 1000 лопастей в пропеллере - почти всегда лишь визуализация, о которой скриптам знать и не нужно
+        // исключениями могут быть какие-нибудь реалистичные симуляторы, в которых от кол-ва лопастей зависит скорость взлета, стабилизация полета и прочее
+
         /// <summary>
         /// Количество лопастей. Может изменяться от 4 до 8.
         /// </summary>
@@ -60,16 +77,20 @@ namespace Assets.Scripts.Helicopter
         public float numberOfBlades;
 
         /// <summary>
-        /// Максимальная скорость вращения винта.
-        /// </summary>
-        [Range(0.0f, 100.0f)]
-        public float maxRotationSpeed;
-
-        /// <summary>
         /// Размер винта.
         /// </summary>
         [Range(1, 10)]
-        public int size;
+        public int size; //4.2, все размеры моделей растягиваются на сцене в компоненте transform, указывать его отдельным полем нет смысла
+
+        /// <summary>
+        /// Определяет положение винта, может быть горизонтальным или вертикальным.
+        /// </summary>
+        public bool isHorizontal; // 4.3 положение винта горизонтальное или вертикальное - опять же можно просто прямо на сцене повернуть винт, как угодно
+
+        #region 5
+
+        // 5 здесь я бы лучше убрал isForwardRotationDirection и дал бы возможность винту принимать отрицательную скорость
+        // т.е maxRotationSpeed Range(-100, 100)
 
         /// <summary>
         /// Определяет направление вращения винта.
@@ -77,9 +98,12 @@ namespace Assets.Scripts.Helicopter
         public bool isForwardRotationDirection;
 
         /// <summary>
-        /// Определяет положение винта, может быть горизонтальным или вертикальным.
+        /// Максимальная скорость вращения винта.
         /// </summary>
-        public bool isHorizontal;
+        [Range(0.0f, 100.0f)]
+        public float maxRotationSpeed;
+
+        #endregion
     }
 
     /// <summary>
@@ -141,6 +165,9 @@ namespace Assets.Scripts.Helicopter
         }
 
         #region Unity events
+                
+        //вот здесь особенно 1.2 вот здесь вот особенно не стоило писать пояснения, метод Start дефолтный и общеизвестный
+        //это как объяснять человеку, что на старте происходит старт, дело излишнее
 
         /// <summary>
         /// The Start.
@@ -149,6 +176,8 @@ namespace Assets.Scripts.Helicopter
         {
             m_VisualController.SetupHelicopterView(m_HelicopterParameters);
         }
+
+        //1.3 аналогично с 1.2
 
         /// <summary>
         /// The Update.
