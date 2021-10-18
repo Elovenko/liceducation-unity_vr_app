@@ -21,13 +21,13 @@ namespace Assets.Scripts.Race
         void Update()
         {
             // Меняем направление движения после каждой 3-й итерации.
-            if (Mathf.Ceil(m_TrackObject.m_TestDistance) % (3 * trackLength) == 0)
-            {
-                m_IsForwardDirection = !m_IsForwardDirection;
-            }
+            //if (Mathf.Ceil(m_TrackObject.m_TestDistance) % (3 * trackLength) == 0)
+            //{
+            //    m_IsForwardDirection = !m_IsForwardDirection;
+            //}
 
-            m_TrackObject.m_TestDistance += (m_IsForwardDirection ? 1 : -1) * m_TestSpeed;
-            m_TrackObject.OnValidate();
+            //m_TrackObject.m_TestDistance += (m_IsForwardDirection ? 1 : -1) * m_TestSpeed;
+            //m_TrackObject.OnValidate();
         }
     }
 }

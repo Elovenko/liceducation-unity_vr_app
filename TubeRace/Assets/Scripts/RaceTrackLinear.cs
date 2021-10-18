@@ -44,14 +44,14 @@ namespace Assets.Scripts.Race
 
         #region Test
 
-        [SerializeField] internal float m_TestDistance;
-        [SerializeField] private Transform m_TestObject;
+        //[SerializeField] internal float m_TestDistance;
+        //[SerializeField] private Transform m_TestObject;
 
-        internal void OnValidate()
-        {
-            m_TestObject.position = GetPosition(m_TestDistance);
-            m_TestObject.forward = GetDirection(m_TestDistance);
-        }
+        //internal void OnValidate()
+        //{
+        //    m_TestObject.position = GetPosition(m_TestDistance);
+        //    m_TestObject.forward = GetDirection(m_TestDistance);
+        //}
 
         #endregion
     }
