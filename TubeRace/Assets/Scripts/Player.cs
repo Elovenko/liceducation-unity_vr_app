@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Race
@@ -23,6 +20,7 @@ namespace Assets.Scripts.Race
         {
             m_ActiveBike.SetForwardThrustAxis(0);
             m_ActiveBike.SetHorizontalThrustAxis(0);
+
             // WASD control
             if (Input.GetKey(KeyCode.W))
             {
@@ -40,8 +38,6 @@ namespace Assets.Scripts.Race
             {
                 m_ActiveBike.SetHorizontalThrustAxis(1);
             }
-
         }
     }
-
 }

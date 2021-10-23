@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Race
@@ -19,13 +17,18 @@ namespace Assets.Scripts.Race
         [SerializeField]
         private float m_RadiusModifier = 1;
 
-        private void OnValidate()
+        [Range(-200.0f, 200.0f)]
+        [SerializeField]
+        private float m_RotationSpeed = 50.0f;
+
+        private void Update()
         {
-            SetObstaclePosition();
+            SetObstaclePosition(Time.deltaTime * m_RotationSpeed);
         }
 
-        private void SetObstaclePosition()
+        private void SetObstaclePosition(float deltaRoll)
         {
+            m_RollAngle += deltaRoll;
             Vector3 obstaclePos = m_Track.GetPosition(m_Distance);
             Vector3 obstacleDir = m_Track.GetDirection(m_Distance);
 
@@ -34,14 +37,17 @@ namespace Assets.Scripts.Race
 
 
             transform.position = obstaclePos - trackOffset;
-
             transform.rotation = Quaternion.LookRotation(obstacleDir, trackOffset);
+        }
+
+        private void OnValidate()
+        {
+            //SetObstaclePosition();
         }
 
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.red;
-
             Vector3 centerLinePos = m_Track.GetPosition(m_Distance);
             Gizmos.DrawSphere(centerLinePos, m_Track.Radius);
         }

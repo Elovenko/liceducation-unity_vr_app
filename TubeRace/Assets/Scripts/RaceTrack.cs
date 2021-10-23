@@ -30,7 +30,6 @@ namespace Assets.Scripts.Race
         /// Возвращает направление в 3д кривой центр-линии трубы. 
         /// Касательная к кривой в точке.
         /// </summary>
-        /// <param name="distance"></param>
         public abstract Vector3 GetDirection(float distance);
     }
 }
