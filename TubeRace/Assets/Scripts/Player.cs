@@ -11,12 +11,12 @@ namespace Assets.Scripts.Race
         [SerializeField]
         private Bike m_ActiveBike;
 
-        private void Update()
+        public void Update()
         {
-            ControlBike();
+            controlBike();
         }
 
-        private void ControlBike()
+        private void controlBike()
         {
             m_ActiveBike.SetForwardThrustAxis(0);
             m_ActiveBike.SetHorizontalThrustAxis(0);
@@ -38,6 +38,8 @@ namespace Assets.Scripts.Race
             {
                 m_ActiveBike.SetHorizontalThrustAxis(1);
             }
+
+            m_ActiveBike.SetAfterburnerEnable(Input.GetKey(KeyCode.Space));
         }
     }
 }

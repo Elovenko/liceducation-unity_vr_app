@@ -7,33 +7,39 @@ namespace Assets.Scripts.Race
     public class BikeParameters
     {
         [Range(0.0f, 10.0f)]
-        public float mass;
+        public float Mass;
 
         [Range(0.0f, 100.0f)]
-        public float thrust;
+        public float Thrust;
+
+        public float AfterburnerThrust;
+        public float AfterburnerMaxSpeed;
+
+        public float AfterburnerCoolSpeed;
+        public float AfterburnerHeatGeneration; // per second
+        public float AfterburnerMaxHeat;
 
         [Range(0.0f, 100.0f)]
-        public float agility;
-        public float maxSpeed;
-        public float maxDriftSpeed;
+        public float Agility;
+        public float MaxSpeed;
+        public float MaxDriftSpeed;
 
         [Range(0.0f, 1.0f)]
-        public float linearDrag;
+        public float LinearDrag;
 
         [Range(0.0f, 1.0f)]
-        public float rollDrag;
+        public float RollDrag;
 
         [Range(0.0f, 1.0f)]
-        public float collisionBounceFactor;
+        public float CollisionBounceFactor;
 
-        public bool afterburner;
-
-        public GameObject engineModel;
-        public GameObject hullModel;
+        public GameObject EngineModel;
+        public GameObject HullModel;
     }
 
     public class Bike : MonoBehaviour
     {
+        public const string TAG = "Bike";
         [SerializeField]
         private BikeParameters m_BikeParametersInitial;
 
@@ -42,6 +48,25 @@ namespace Assets.Scripts.Race
 
         [SerializeField]
         private RaceTrack m_Track;
+
+        public float Distance => m_Distance;
+        public float Velocity => m_Velocity;
+        public float RollAngle => m_RollAngle;
+
+        public float PreviousDistance => m_PreviousDistance;
+
+        public int CurrentLap => (int)(m_Distance / m_Track.GetTrackLength()) + 1;
+
+        public float NormolizedHeat => (m_BikeParametersInitial.AfterburnerMaxHeat > 0) ? m_AfterburnerHeat / m_BikeParametersInitial.AfterburnerMaxHeat : 0;
+
+        public float Fuel => m_Fuel;
+
+        public void AddFuel(float amount)
+        {
+            m_Fuel += amount;
+
+            m_Fuel = Mathf.Clamp(m_Fuel, 0.0f, 100.0f);
+        }
 
         /// <summary>
         /// Управление газом байка. Нормализованное. От -1 до +1.
@@ -53,10 +78,20 @@ namespace Assets.Scripts.Race
         /// </summary>
         private float m_HorizontalThrustAxis;
 
+        /// <summary>
+        /// Вкл/Выкл доп ускорителя.
+        /// </summary>
+        private bool m_AfterburnerIsEnabled;
+
         private float m_Distance;
         private float m_Velocity;
         private float m_RollAngle;
         private float m_DriftAngleSpeed;
+        private float m_AfterburnerHeat;
+        private float m_PreviousDistance;
+        // 0 -100
+
+        private float m_Fuel;
 
         /// <summary>
         /// Установка значение педали газа.
@@ -65,56 +100,104 @@ namespace Assets.Scripts.Race
 
         public void SetHorizontalThrustAxis(float val) => m_HorizontalThrustAxis = val;
 
-        private void Update()
+        public void SetAfterburnerEnable(bool val) => m_AfterburnerIsEnabled = val;
+
+        public void CoolAfterburner() => m_AfterburnerHeat = 0;
+
+        public void Update()
         {
-            UpdateBikePhysics();
+            updateAfterBurnerHeat();
+            updateBikePhysics();
         }
 
-        private void UpdateBikePhysics()
+        private void updateAfterBurnerHeat()
+        {
+            float dt = Time.deltaTime;
+
+            // calc heat dissipation
+            m_AfterburnerHeat -= m_BikeParametersInitial.AfterburnerCoolSpeed * dt;
+            if (m_AfterburnerHeat < 0)
+            {
+                m_AfterburnerHeat = 0;
+            }
+
+            // Check max heat?
+        }
+
+        private bool consumerFuelForAfterburner(float amount)
+        {
+            if (m_Fuel <= amount)
+            {
+                return false;
+            }
+
+            m_Fuel -= amount;
+
+            return true;
+        }
+
+        private void updateBikePhysics()
         {
             // S=vt; F=ma; V=V0+at
             float dt = Time.deltaTime;
-            float dv = dt * m_ForwardThrustAxis * m_BikeParametersInitial.thrust;
+
+
+            float force = m_ForwardThrustAxis * m_BikeParametersInitial.Thrust;
+            float forceThrustMax = m_BikeParametersInitial.Thrust;
+            float maxSpeed = m_BikeParametersInitial.MaxSpeed;
+
+            if (m_AfterburnerIsEnabled && consumerFuelForAfterburner(1.0f * dt))
+            {
+                m_AfterburnerHeat += m_BikeParametersInitial.AfterburnerHeatGeneration * dt;
+
+                force += m_BikeParametersInitial.AfterburnerThrust;
+                forceThrustMax += m_BikeParametersInitial.AfterburnerThrust;
+                maxSpeed += m_BikeParametersInitial.AfterburnerMaxSpeed;
+            }
+
+            // Drag.
+            force += -m_Velocity * (forceThrustMax / maxSpeed);
+
+            float dv = dt * force;
 
             m_Velocity += dv;
-
-            m_Velocity = Mathf.Clamp(m_Velocity, -m_BikeParametersInitial.maxSpeed, m_BikeParametersInitial.maxSpeed);
 
             float ds = m_Velocity * dt;
 
             // collision on move forward
             if (Physics.Raycast(transform.position, transform.forward, ds))
             {
-                m_Velocity = -m_Velocity * m_BikeParametersInitial.collisionBounceFactor;
+                m_Velocity = -m_Velocity * m_BikeParametersInitial.CollisionBounceFactor;
                 ds = m_Velocity * dt;
             }
 
+            m_PreviousDistance = m_Distance;
+
             m_Distance += ds;
-            m_Velocity += -m_Velocity * m_BikeParametersInitial.linearDrag * dt;
 
             if (m_Distance < 0)
             {
                 m_Distance = 0;
             }
 
-            float deltaAngleVelocity = m_HorizontalThrustAxis * m_BikeParametersInitial.agility * dt;
+            float deltaAngleVelocity = m_HorizontalThrustAxis * m_BikeParametersInitial.Agility * dt;
 
             m_DriftAngleSpeed += deltaAngleVelocity;
 
-            m_DriftAngleSpeed = Mathf.Clamp(m_DriftAngleSpeed, -m_BikeParametersInitial.maxDriftSpeed, m_BikeParametersInitial.maxDriftSpeed);
+            m_DriftAngleSpeed = Mathf.Clamp(m_DriftAngleSpeed, -m_BikeParametersInitial.MaxDriftSpeed, m_BikeParametersInitial.MaxDriftSpeed);
 
             float dr = m_DriftAngleSpeed * dt;
 
             // collision on move to rigth
             if (Physics.Raycast(transform.position, transform.right, dr))
             {
-                m_DriftAngleSpeed = -m_DriftAngleSpeed * m_BikeParametersInitial.collisionBounceFactor;
+                m_DriftAngleSpeed = -m_DriftAngleSpeed * m_BikeParametersInitial.CollisionBounceFactor;
                 dr = m_DriftAngleSpeed * dt;
             }
 
             m_RollAngle += dr;
 
-            m_DriftAngleSpeed += -m_DriftAngleSpeed * m_BikeParametersInitial.rollDrag * dt;
+            m_DriftAngleSpeed += -m_DriftAngleSpeed * m_BikeParametersInitial.RollDrag * dt;
 
             Vector3 bikePos = m_Track.GetPosition(m_Distance);
             Vector3 bikeDir = m_Track.GetDirection(m_Distance);
@@ -126,9 +209,9 @@ namespace Assets.Scripts.Race
             transform.rotation = Quaternion.LookRotation(bikeDir, trackOffset);
         }
 
-        private void MoveBike()
+        private void moveBike()
         {
-            float currentForwardVelocity = m_ForwardThrustAxis * m_BikeParametersInitial.maxSpeed;
+            float currentForwardVelocity = m_ForwardThrustAxis * m_BikeParametersInitial.MaxSpeed;
             Vector3 forwardModeDelta = transform.forward * currentForwardVelocity * Time.deltaTime;
             transform.position += forwardModeDelta;
         }

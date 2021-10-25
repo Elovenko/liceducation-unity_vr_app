@@ -1,10 +1,13 @@
+using UnityEngine;
+
 namespace Assets.Scripts.Race
 {
     public class PowerupCoolant : Powerup
     {
-        public override void OnPickedByPlayer()
+        public override void OnPickedByBike(Bike bike)
         {
-            throw new System.NotImplementedException();
+            bike.CoolAfterburner();
+            Debug.Log($"{nameof(PowerupCoolant)} pickup by {bike.name}.");
         }
     }
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Race
 {
-    public class Obatacle : MonoBehaviour
+    public class Obstacle : MonoBehaviour
     {
         [SerializeField]
         private RaceTrack m_Track;
@@ -21,12 +21,23 @@ namespace Assets.Scripts.Race
         [SerializeField]
         private float m_RotationSpeed = 50.0f;
 
-        private void Update()
+        public void Update()
         {
-            SetObstaclePosition(Time.deltaTime * m_RotationSpeed);
+            setObstaclePosition(Time.deltaTime * m_RotationSpeed);
+        }
+        public void OnValidate()
+        {
+            setObstaclePosition(0);
         }
 
-        private void SetObstaclePosition(float deltaRoll)
+        public void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Vector3 centerLinePos = m_Track.GetPosition(m_Distance);
+            Gizmos.DrawSphere(centerLinePos, m_Track.Radius);
+        }
+
+        private void setObstaclePosition(float deltaRoll)
         {
             m_RollAngle += deltaRoll;
             Vector3 obstaclePos = m_Track.GetPosition(m_Distance);
@@ -38,18 +49,6 @@ namespace Assets.Scripts.Race
 
             transform.position = obstaclePos - trackOffset;
             transform.rotation = Quaternion.LookRotation(obstacleDir, trackOffset);
-        }
-
-        private void OnValidate()
-        {
-            //SetObstaclePosition();
-        }
-
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = Color.red;
-            Vector3 centerLinePos = m_Track.GetPosition(m_Distance);
-            Gizmos.DrawSphere(centerLinePos, m_Track.Radius);
         }
     }
 }
