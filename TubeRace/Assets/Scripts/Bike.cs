@@ -33,6 +33,9 @@ namespace Assets.Scripts.Race
         [Range(0.0f, 1.0f)]
         public float CollisionBounceFactor;
 
+        [Range(0.0f, 100.0f)]
+        public float CollisionDamage;
+
         public GameObject EngineModel;
         public GameObject HullModel;
     }
@@ -40,6 +43,7 @@ namespace Assets.Scripts.Race
     public class Bike : MonoBehaviour
     {
         public const string TAG = "Bike";
+
         [SerializeField]
         private BikeParameters m_BikeParametersInitial;
 
@@ -51,7 +55,14 @@ namespace Assets.Scripts.Race
 
         public float Distance => m_Distance;
         public float Velocity => m_Velocity;
-        public float RollAngle => m_RollAngle;
+        public float RollAngle
+        {
+            get
+            {
+                float angle = m_RollAngle % 360.0f;
+                return angle > 0 ? angle : (360 + angle);
+            }
+        }
 
         public float PreviousDistance => m_PreviousDistance;
 
@@ -60,13 +71,6 @@ namespace Assets.Scripts.Race
         public float NormolizedHeat => (m_BikeParametersInitial.AfterburnerMaxHeat > 0) ? m_AfterburnerHeat / m_BikeParametersInitial.AfterburnerMaxHeat : 0;
 
         public float Fuel => m_Fuel;
-
-        public void AddFuel(float amount)
-        {
-            m_Fuel += amount;
-
-            m_Fuel = Mathf.Clamp(m_Fuel, 0.0f, 100.0f);
-        }
 
         /// <summary>
         /// Управление газом байка. Нормализованное. От -1 до +1.
@@ -103,6 +107,22 @@ namespace Assets.Scripts.Race
         public void SetAfterburnerEnable(bool val) => m_AfterburnerIsEnabled = val;
 
         public void CoolAfterburner() => m_AfterburnerHeat = 0;
+
+        public void AddFuel(float amount)
+        {
+            m_Fuel += amount;
+
+            m_Fuel = Mathf.Clamp(m_Fuel, 0.0f, 100.0f);
+        }
+
+        public void Slowdown(float speedAmount)
+        {
+            m_Velocity -= speedAmount;
+            if (m_Velocity < 0)
+            {
+                m_Velocity = 0;
+            }
+        }
 
         public void Update()
         {
@@ -169,6 +189,7 @@ namespace Assets.Scripts.Race
             {
                 m_Velocity = -m_Velocity * m_BikeParametersInitial.CollisionBounceFactor;
                 ds = m_Velocity * dt;
+                m_AfterburnerHeat += m_BikeParametersInitial.CollisionDamage;
             }
 
             m_PreviousDistance = m_Distance;
@@ -193,6 +214,7 @@ namespace Assets.Scripts.Race
             {
                 m_DriftAngleSpeed = -m_DriftAngleSpeed * m_BikeParametersInitial.CollisionBounceFactor;
                 dr = m_DriftAngleSpeed * dt;
+                m_AfterburnerHeat += m_BikeParametersInitial.CollisionDamage;
             }
 
             m_RollAngle += dr;

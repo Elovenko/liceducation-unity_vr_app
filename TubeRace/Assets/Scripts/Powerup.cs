@@ -12,6 +12,12 @@ namespace Assets.Scripts.Race
         [SerializeField]
         private float m_RollAngle;
 
+        [SerializeField]
+        private float m_StartAngle;
+
+        [SerializeField]
+        private float m_EndAngle;
+
         public void Update()
         {
             updateBikes();
@@ -20,6 +26,20 @@ namespace Assets.Scripts.Race
         public void OnValidate()
         {
             setPowerupPosition();
+        }
+
+        public void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Vector3 centerLinePos = m_Track.GetPosition(m_Distance);
+
+            Quaternion q = Quaternion.AngleAxis(m_StartAngle, Vector3.forward);
+            Vector3 trackOffset = q * (-Vector3.up * (m_Track.Radius));
+            Gizmos.DrawRay(centerLinePos, trackOffset);
+
+            q = Quaternion.AngleAxis(m_EndAngle, Vector3.forward);
+            trackOffset = q * (-Vector3.up * (m_Track.Radius));
+            Gizmos.DrawRay(centerLinePos, trackOffset);
         }
 
         public abstract void OnPickedByBike(Bike bike);
@@ -34,9 +54,12 @@ namespace Assets.Scripts.Race
                 if (prev < m_Distance && curr > m_Distance)
                 {
                     // limit angles.
-
-                    // bike picks powerup
-                    OnPickedByBike(bike);
+                    if (m_StartAngle > m_EndAngle && (bike.RollAngle > m_StartAngle || bike.RollAngle < m_EndAngle)
+                        || bike.RollAngle > m_StartAngle && bike.RollAngle < m_EndAngle)
+                    {
+                        // bike picks powerup
+                        OnPickedByBike(bike);
+                    }
                 }
             }
         }
